@@ -125,7 +125,16 @@ public class SimpleJobConfiguration {
 
 **JobRepository 는 배치 작업의 메타데이터와 실행 상태를 저장하고 관리하는 역할**을 합니다. 배치 작업의 시작, 종료, 중단, 재 시작등의 상태를 추적합니다.
 
-**PlatformTransactionManager 는 트랜잭션 관리를 담당하는 인터페이스입니다**. 배치작업 간 단계(Step) 에서의 트랜잭션 경계를 정의하고 관리합니다. 
+**PlatformTransactionManager 는 트랜잭션 관리를 담당하는 인터페이스입니다**. 배치작업 간 단계(Step) 에서의 트랜잭션 경계를 정의하고 관리합니다.
+
+`simpleJob()`  
+Job 을 생성하는 메서드입니다. .start() 내부에 있는 simpleStep1 은 Job 이 실행될때 처음 단계에서 시작합니다.
+
+`simpleStep1()`  
+Step 을 생성하는 메서드입니다. .tasklet() 내부에서는 Step 내부에서 실행될 Tasklet 을 나타냅니다.
+
+`testTasklet()`  
+람다식을 활용해 Tasklet 을 정의합니다. 로그 메시지를 출력하고 작업이 완료되면 RepeatStatus.FINISHED 를 반환해 Step 이 종료됐음을 알립니다.
 
 
 
