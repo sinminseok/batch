@@ -14,7 +14,6 @@
 //
 //    private String name;
 //
-//    @ManyToOne
-//    @JoinColumn(name = "order_id")
-//    private Order teacher;
+//    private Integer price;
+//
 //}
