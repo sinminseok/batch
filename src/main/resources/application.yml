@@ -8,18 +8,19 @@ spring:
   sql:
     init:
       mode: always
+#    data-locations: classpath:data.sql
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         show_sql: true
         format_sql: true
 
-#  batch:
-#    job:
-#      enabled: true
-#      name: ${job.name:NONE}
+  batch:
+    job:
+      enabled: true
+      name: customerJob
     jdbc:
       initialize-schema: always
 
