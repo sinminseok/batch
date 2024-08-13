@@ -51,7 +51,7 @@
 
 **Spring Batch 5 로 Job 만들어 보기**
 
-✅ build.gradle 
+✅ **build.gradle**
 
 ```
 dependencies {
@@ -67,7 +67,7 @@ dependencies {
 }
 ```
 
-✅ SimpleJobConfiguration
+✅ **SimpleJobConfiguration**
 
 ```
 package study.batch.config;
@@ -123,9 +123,9 @@ public class SimpleJobConfiguration {
 
 먼저 메서드에서 사용할 JobRepository 와 PlatformTransactionManager 를 @Autowired 를 통해 주입받아 필드로 선언합니다. 이렇게 선언된 값들은 Job 과 Step 을 만들때 사용될 예정입니다.
 
-JobRepository 는 배치 작업의 메타데이터와 실행 상태를 저장하고 관리하는 역할을 합니다. 배치 작업의 시작, 종료, 중단, 재 시작등의 상태를 추적합니다.
+**JobRepository 는 배치 작업의 메타데이터와 실행 상태를 저장하고 관리하는 역할**을 합니다. 배치 작업의 시작, 종료, 중단, 재 시작등의 상태를 추적합니다.
 
-PlatformTransactionManager 는 트랜잭션 관리를 담당하는 인터페이스입니다. 배치작업 간 단계(Step) 에서의 트랜잭션 경계를 정의하고 관리합니다. 
+**PlatformTransactionManager 는 트랜잭션 관리를 담당하는 인터페이스입니다**. 배치작업 간 단계(Step) 에서의 트랜잭션 경계를 정의하고 관리합니다. 
 
 
 
