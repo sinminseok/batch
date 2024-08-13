@@ -6,6 +6,7 @@ Spring Batch 공부 내용을 정리했습니다.
 
 **Spring Batch란**
 
+
 spring Batch 는 대용량 데이터 처리를 위한 Spring Framework 의 서브 프로젝트로,배치 처리
 작업을 효울적으로 실행하도록 도와줍니다. Spring Batch 를 사용하면 반복적이고
 대량의 데이터를 처리하는 작업을 쉽게 설정하고 관리할 수 있습니다.
