@@ -1,12 +1,10 @@
-Job 플로우 제어하기
-
-🎯 여러개의 Step 들간 순서, 흐름 제어해보기
+**🎯 Job 플로우 제어하기**
 
 
 가장 먼저 소개할 방법은 Next 입니다. 쉬운 개념이니 코드부터 확인해보겠습니다.
 
 
-
+```
 package batch.example.job;
 
 import lombok.extern.slf4j.Slf4j;
@@ -86,7 +84,7 @@ public class SimpleNextJobConfiguration {
         };
     }
 }
-
+```
 
 simpleJob1() 을 살펴보면 .start() 이후에 .next() 를 선언했고, 내부에 각각 실행시킬 step 들을 넣어줬습니다. next() 는 순차적으로 Step 을 연결시킬때 사용합니다.
 
@@ -96,10 +94,7 @@ simpleJob1() 을 살펴보면 .start() 이후에 .next() 를 선언했고, 내�
 
 
 
-
-
-
-org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'jobLauncherApplicationRunner' defined in class path resource [org/springframework/boot/autoconfigure/batch/BatchAutoConfiguration.class]: Job name must be specified in case of multiple jobs
+```org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'jobLauncherApplicationRunner' defined in class path resource [org/springframework/boot/autoconfigure/batch/BatchAutoConfiguration.class]: Job name must be specified in case of multiple jobs```
 
 
 
@@ -110,18 +105,15 @@ org.springframework.beans.factory.BeanCreationException: Error creating bean wit
 이를 해결할 방법은 크게 두가지가 있습니다.
 
 
-
 - application.yml 에서 실행할 Job 지정하기
 
 - 애플리케이션 코드 수정
 
 
-
 (이번 포스팅에선 applcation.yml 에서 job 을 직접 지정하는 방법을 사용하겠습니다.)
 
 
-
-# Spring Datasource Configuration
+```
 spring:
 
 datasource:
@@ -136,11 +128,9 @@ enabled: true
 name: simpleNextJob
 jdbc:
 initialize-schema: always
-
+```
 
 이런식으로 batch.job.name 에 실행할 job 이름을 넣어줍니다. 그리고 실행시키면?
-
-
 
 
 
@@ -149,7 +139,8 @@ initialize-schema: always
 
 
 
-🎯 조건별 흐름 제어하기
+**🎯 조건별 흐름 제어하기**
+
 배치 프로세스는 한가지 플로우만을 가지지 않습니다. 예를 들어 step1, step2, step3 가 있는 상황에서 모두 순차적으로 정상 작동하면 좋겠지만, step1 에서 오류가 발생한 경우 나머지 뒤에 있는 step 들이 실행되지 않습니다. 때문에 각각의 step 이 어떻게 동작하냐에 따라 흐름을 제어할 수 있어야 합니다.
 
 
@@ -170,6 +161,7 @@ initialize-schema: always
 
 - step1 성공시 : step1 -> step2 -> step3
 
+```
 package batch.example.job;
 
 import lombok.RequiredArgsConstructor;
@@ -250,14 +242,12 @@ public class StepNextConditionalJobConfiguration {
 
 
 }
-
+```
 
 simpleNextConditionalJob1() 메서드는 Job 내부에서 step 의 실행 흐름도를 정의했습니다. 어려운 내용은 아니여서, 주석을 참고하시면 충분히 이해할 수 있을겁니다! 주의해서 봐야할 곳은 .on() 에서  "FAILED" 를 캐치하는데, 이는 상태값이 ExitStatus 라는 점 입니다. 즉, 분기 처리를 위해 상태값 조정이 필요하면 ExitStatus 를 조정해야 합니다.
 
 
-
 conditionalJobStep1 에서  contribution.setExitStatus(ExitStatus.FAILED) 를 설정해 step1 에서 FAILED 를 발생 시켰습니다.
-
 
 
 이를 실행시키면 다음과 같이 step1 이후 step3 가 실행되는 것을 확인할 수 있습니다 .
@@ -265,12 +255,10 @@ conditionalJobStep1 에서  contribution.setExitStatus(ExitStatus.FAILED) 를 �
 
 
 
-
-
 다음과 같이 코드를 살작 수정해서 실행시키면
 
 
-
+```
     @Bean
     public Step conditionalJobStep1() {
         return new StepBuilder("conditionalJobStep1", jobRepository)
@@ -281,14 +269,15 @@ conditionalJobStep1 에서  contribution.setExitStatus(ExitStatus.FAILED) 를 �
                 }), platformTransactionManager)
                 .build();
     }
-
+```
 
 
 짠 step1 에서 FAILED 가 발생하지 않아 step1 -> step2 -> step3 순서로 실행되는 것을 확인할 수 있습니다
 
 
 
-🎯 Decide
+**🎯 Decide**
+
 위 방식에서 진행한 분기 처리 방식은 두가지 문제가 있습니다.
 
 
@@ -302,7 +291,7 @@ conditionalJobStep1 에서  contribution.setExitStatus(ExitStatus.FAILED) 를 �
 명확하게 Step 들간의 Flow 분기만 담당하고 다양한 분기처리가 가능한 타입이 바로 JobExecutionDecider 입니다. 이를 이용한 예제 코드는 다음과 같습니다.
 
 
-
+```
 package batch.example.job;
 
 import lombok.RequiredArgsConstructor;
@@ -404,16 +393,10 @@ public class DeciderJobConfiguration {
         }
     }
 }
-
+```
 
 해당 코드에서는 분기 로직을 OddDecider 가 담당합니다. JobExecutionDecider 를 상속받아 분기로직을 구현하고 이를 decider 메서드에서 호출합니다. 이렇게 분리된 분기 로직을 이용해 Step 과 역할과 책임을 분리 했습니다. 위 코드를 실행시켜보면..
 
 
-
-
-
-
 뾰로롱 OddDecider 가 분기처리(홀수 짝수 구분) 를 한 뒤 각각의 상황에 따라 step 을 실행시키고 있습니다.!  정리해보면, JobExecutionDecider 는 Step 들의 Flow 속에서 분기만을 담당하는 타입 임을 확인할 수 있습니다.
-
-
 
