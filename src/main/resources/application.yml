@@ -20,7 +20,7 @@ spring:
   batch:
     job:
       enabled: true
-      name: customerJob
+      name: parameterJob
     jdbc:
       initialize-schema: always
 

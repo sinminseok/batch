@@ -21,4 +21,7 @@ public class Order {
 
     private LocalDateTime orderDate;
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Item> items;  // Order에 포함된 Item 목록
+
 }
