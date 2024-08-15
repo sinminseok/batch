@@ -12,6 +12,8 @@
 
 👉[Chunk 와 ItemReader & ItemProcessor & ItemWriter](https://comumu.tistory.com/113?category=1180103)
 
-👉[Spring Batch 5 Chunk 예제 코드 만들어보기](https://comumu.tistory.com/114?category=1180103)
+👉[Spring Batch 5 Chunk 예제 코드 만들어보기] (https://comumu.tistory.com/114?category=1180103)
+
+👉[Spring Batch 5 통합 테스트 설계 방법] (https://comumu.tistory.com/116)
 
 

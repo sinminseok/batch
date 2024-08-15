@@ -6,21 +6,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.batch.core.*;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.test.JobLauncherTestUtils;
+import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import study.batch.entity.Order;
 import study.batch.entity.OrderHistory;
 import study.batch.repository.OrderHistoryRepository;
@@ -35,12 +28,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @SpringBatchTest // (1)
 @ActiveProfiles("test")
 @ExtendWith(SpringExtension.class)
-@SpringBootTest()
-@Import(ParameterConfiguration.class)
-@EnableBatchProcessing
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
+@SpringBootTest
 public class ParameterConfigurationTest {
-
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -57,6 +46,10 @@ public class ParameterConfigurationTest {
     @Autowired
     private Job parameterJob;
 
+    @Autowired
+    private JobRepositoryTestUtils jobRepositoryTestUtils;
+
+
     @BeforeEach
     public void setUp() {
         jobLauncherTestUtils.setJob(parameterJob);
@@ -64,12 +57,7 @@ public class ParameterConfigurationTest {
 
     @AfterEach
     public void tearDown() {
-        jdbcTemplate.execute("DELETE FROM BATCH_STEP_EXECUTION_CONTEXT");
-        jdbcTemplate.execute("DELETE FROM BATCH_JOB_EXECUTION_CONTEXT");
-        jdbcTemplate.execute("DELETE FROM BATCH_JOB_EXECUTION_PARAMS");
-        jdbcTemplate.execute("DELETE FROM BATCH_STEP_EXECUTION");
-        jdbcTemplate.execute("DELETE FROM BATCH_JOB_EXECUTION");
-        jdbcTemplate.execute("DELETE FROM BATCH_JOB_INSTANCE");
+        jobRepositoryTestUtils.removeJobExecutions();
     }
 
 

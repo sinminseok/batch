@@ -46,7 +46,6 @@ public class ParameterConfiguration {
     private EntityManagerFactory entityManagerFactory;
 
 
-
     private final CreateDateJobParameter jobParameter;
 
     @Bean(JOB_NAME + "jobParameter")
@@ -119,11 +118,4 @@ public class ParameterConfiguration {
         return writer;
     }
 
-
-
-    private static String parseDateToString(String requestDate) {
-        LocalDate date = LocalDate.parse(requestDate, DateTimeFormatter.ofPattern("yyyyMMdd"));
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-        return date.format(formatter);
-    }
 }
