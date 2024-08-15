@@ -14,20 +14,16 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.database.JpaItemWriter;
+import org.springframework.batch.item.database.JpaPagingItemReader;
+import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
-import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.format.support.FormattingConversionService;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.transaction.PlatformTransactionManager;
 import study.batch.entity.Order;
 import study.batch.entity.OrderHistory;
 import study.batch.parameters.CreateDateJobParameter;
 
-import javax.sql.DataSource;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -49,8 +45,6 @@ public class ParameterConfiguration {
     @Autowired
     private EntityManagerFactory entityManagerFactory;
 
-    @Autowired
-    private DataSource dataSource;
 
 
     private final CreateDateJobParameter jobParameter;
@@ -76,7 +70,7 @@ public class ParameterConfiguration {
     public Step parameterJobStep() {
         return new StepBuilder(JOB_NAME + "Step", jobRepository)
                 .<Order, OrderHistory>chunk(10, platformTransactionManager)
-                .reader(reader())
+                .reader(jpaPagingItemReader())
                 .processor(processor())
                 .writer(writer())
                 .build();
@@ -85,26 +79,22 @@ public class ParameterConfiguration {
     /**
      * ItemReader
      */
-    @Bean(name = "parameterReader")
+    @Bean(name = "jpaPagingItemReader")
     @StepScope
-    public JdbcCursorItemReader<Order> reader() {
-
+    public JpaPagingItemReader<Order> jpaPagingItemReader() {
         Map<String, Object> params = new HashMap<>();
         params.put("requestDate", jobParameter.getRequestDate());
         params.put("status", jobParameter.getStatus());
+        // JPQL 쿼리를 사용하여 요청된 날짜와 일치하는 주문만 선택
+        String jpql = "SELECT o FROM Order o WHERE DATE(o.orderDate) = :requestDate";
 
-
-        JdbcCursorItemReader<Order> reader = new JdbcCursorItemReader<>();
-        reader.setDataSource(dataSource);
-
-        // 쿼리 수정: 요청된 날짜와 일치하는 주문만 선택
-        String sql = "SELECT id, order_number, order_date FROM order_table " +
-                "WHERE DATE(order_date) = ?";
-
-        reader.setSql(sql);
-        reader.setPreparedStatementSetter(ps -> ps.setString(1, params.get("requestDate").toString()));
-        reader.setRowMapper(new BeanPropertyRowMapper<>(Order.class)); //DB 에서 읽어온 각 행의 데이터를 Order 객체로 변환하여 처리할 수 있도록 설정
-        return reader;
+        return new JpaPagingItemReaderBuilder<Order>()
+                .name("parameterReader")
+                .entityManagerFactory(entityManagerFactory)
+                .pageSize(10)
+                .queryString(jpql)
+                .parameterValues(Map.of("requestDate", params.get("requestDate"))) // 파라미터 설정
+                .build();
     }
 
     /**

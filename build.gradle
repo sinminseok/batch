@@ -26,15 +26,20 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-batch'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-//	implementation 'org.springframework.boot:spring-boot-starter-quartz'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	// JUnit 5 dependencies
+	testImplementation 'org.springframework.boot:spring-boot-starter-test' // Includes JUnit 5
 	testImplementation 'org.springframework.batch:spring-batch-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// H2 Database for in-memory usage
+	testImplementation 'com.h2database:h2'
+	runtimeOnly 'com.h2database:h2'
 }
 
-tasks.named('test') {
+
+test {
 	useJUnitPlatform()
 }
