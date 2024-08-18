@@ -22,6 +22,8 @@ public class OrderHistory {
 
     private String orderNumber;
 
+    private Integer orderPrice;
+
     private LocalDateTime orderDateTime;
 
 }

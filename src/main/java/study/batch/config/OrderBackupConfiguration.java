@@ -8,11 +8,9 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
@@ -31,9 +29,10 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 @Configuration
-public class ParameterConfiguration {
+public class OrderBackupConfiguration {
 
-    private static final String JOB_NAME = "parameterJob";
+    private static final String JOB_NAME = "orderBackupBatch";
+    private static final String STEP_NAME = JOB_NAME + "STEP";
 
     @Autowired
     private JobRepository jobRepository;
@@ -44,79 +43,62 @@ public class ParameterConfiguration {
     @Autowired
     private EntityManagerFactory entityManagerFactory;
 
-
     private final CreateDateJobParameter jobParameter;
 
-    @Bean("parameterJobParameter")
+    @Bean("orderBackupJobParameter")
     @JobScope
-    public CreateDateJobParameter parameterJobParameter(){
-        System.out.println("NOT PRIMATYYYY");
+    public CreateDateJobParameter orderBackupJobParameter() {
         return new CreateDateJobParameter();
     }
 
-
     @Bean
-    public Job parameterJob() {
+    public Job job(){
         return new JobBuilder(JOB_NAME, jobRepository)
-                .incrementer(new RunIdIncrementer())
-                .start(parameterJobStep())
+                .start(step())
                 .build();
     }
-
 
     @Bean
     @JobScope
-    public Step parameterJobStep() {
-        return new StepBuilder(JOB_NAME + "Step", jobRepository)
+    public Step step() {
+        return new StepBuilder(STEP_NAME, jobRepository)
                 .<Order, OrderHistory>chunk(10, platformTransactionManager)
-                .reader(jpaPagingItemReader())
-                .processor(processor())
-                .writer(writer())
+                .reader(orderBackupReader())  // 이름 변경
+                .processor(orderBackupProcessor())  // 이름 변경
+                .writer(orderBackupWriter())  // 이름 변경
                 .build();
     }
 
-    /**
-     * ItemReader
-     */
-    @Bean(name = "jpaPagingItemReader")
+    @Bean(name = JOB_NAME + "orderBackupReader")
     @StepScope
-    public JpaPagingItemReader<Order> jpaPagingItemReader() {
-        System.out.println("-----");
-        System.out.println(jobParameter.getRequestDate());
+    public JpaPagingItemReader<Order> orderBackupReader() {  // 이름 변경
         Map<String, Object> params = new HashMap<>();
         params.put("requestDate", jobParameter.getRequestDate());
-        params.put("status", jobParameter.getStatus());
-        // JPQL 쿼리를 사용하여 요청된 날짜와 일치하는 주문만 선택
-        String jpql = "SELECT o FROM Order o WHERE DATE(o.orderDate) = :requestDate";
+
+        String query = "SELECT o FROM Order o WHERE DATE(o.orderDate) = :requestDate";
 
         return new JpaPagingItemReaderBuilder<Order>()
-                .name("parameterReader")
+                .name("orderBackupReader")  // 이름 변경
                 .entityManagerFactory(entityManagerFactory)
                 .pageSize(10)
-                .queryString(jpql)
-                .parameterValues(Map.of("requestDate", params.get("requestDate"))) // 파라미터 설정
+                .queryString(query)
+                .parameterValues(Map.of("requestDate", params.get("requestDate")))
                 .build();
     }
 
-    /**
-     * processor
-     */
-    @Bean(name = "parameterProcessor")
-    public ItemProcessor<Order, OrderHistory> processor() {
+    @Bean(name = JOB_NAME + "orderBackupProcessor")
+    public ItemProcessor<Order, OrderHistory> orderBackupProcessor() {  // 이름 변경
         return order -> OrderHistory.builder()
                 .orderNumber(order.getOrderNumber())
                 .orderDateTime(order.getOrderDate())
+                .orderPrice(order.calculatePrice())
                 .build();
     }
 
-    /**
-     * ItemWriter
-     */
-    @Bean(name = "parameterWriter")
-    public JpaItemWriter<OrderHistory> writer() {
+    @Bean(name = JOB_NAME + "orderBackupWriter")
+    public JpaItemWriter<OrderHistory> orderBackupWriter() {  // 이름 변경
         JpaItemWriter<OrderHistory> writer = new JpaItemWriter<>();
         writer.setEntityManagerFactory(entityManagerFactory);
         return writer;
     }
-
 }

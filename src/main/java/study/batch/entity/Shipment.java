@@ -3,20 +3,25 @@ package study.batch.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Setter
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Item {
+public class Shipment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private String trackingNumber;
 
-    private Integer price;
+    private LocalDateTime shippedDate;
+
+    private String carrier;
 
     @ManyToOne
     @JoinColumn(name = "order_id")

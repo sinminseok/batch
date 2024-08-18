@@ -23,6 +23,7 @@ public class CreateDateJobParameter {
 
     @Value("#{jobParameters[requestDate]}")
     public void setCreateDate(String requestDate) {
+        System.out.println("WHEN?");
         this.requestDate = LocalDate.parse(requestDate, DateTimeFormatter.ofPattern("yyyyMMdd"));
     }
 }
